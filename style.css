@@ -1,0 +1,57 @@
+const chatLog = document.getElementById('chat-log');
+const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
+
+sendButton.addEventListener('click', sendMessage);
+
+function sendMessage() {
+    const message = userInput.value;
+    if (message.trim() !== '') {
+        displayUserMessage(message);
+        userInput.value = '';
+        // Kirim pesan ke backend dan dapatkan jawaban dari bot
+        getBotResponse(message);
+    }
+}
+
+function displayUserMessage(message) {
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.classList.add('user-message');
+    userMessageDiv.textContent = message;
+    chatLog.appendChild(userMessageDiv);
+    chatLog.scrollTop = chatLog.scrollHeight; // Scroll ke bawah
+}
+
+function displayBotMessage(message) {
+    const botMessageDiv = document.createElement('div');
+    botMessageDiv.classList.add('bot-message');
+    botMessageDiv.textContent = message;
+    chatLog.appendChild(botMessageDiv);
+    chatLog.scrollTop = chatLog.scrollHeight; // Scroll ke bawah
+}
+
+function getBotResponse(message) {
+    // TODO: Ganti URL ini dengan URL endpoint backend Anda
+    const url = 'http://localhost:5000/chat'; // Contoh URL backend Flask
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({message: message})
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayBotMessage(data.response); // 'response' adalah kunci dari JSON yang dikembalikan backend
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        displayBotMessage('Maaf, ada masalah saat memproses pertanyaan Anda.');
+    });
+}
+
+userInput.addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+});
